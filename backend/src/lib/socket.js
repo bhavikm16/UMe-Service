@@ -11,11 +11,13 @@ const io = new Server(server, {
     },
 });
 
+
 export function getRecieverSocketID(userId){
     return userSocketMap[userId];
 };
 
 const userSocketMap = {}; 
+const activeCalls = {};
 io.on("connection" , (socket) => {
     console.log("User Connected" ,  socket.id);
     const userId = socket.handshake.query.userId

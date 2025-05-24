@@ -1,11 +1,9 @@
-import { useState } from "react";
-import { MessageSquare, Search } from "lucide-react";
+import { MessageSquare, MessageCirclePlus } from "lucide-react";
 
-const NoChatSelected = () => {
+const NoChatSelected = ({ onOpenSearch }) => {
   return (
-    <div className="w-full flex flex-1 flex-col items-center justify-center p-16 bg-base-100/50 relative">
+    <div className="flex-1 flex flex-col items-center justify-center p-16 bg-base-100/50">
       <div className="max-w-md text-center space-y-6">
-        {/* Icon Display */}
         <div className="flex justify-center gap-4 mb-4">
           <div className="relative">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center animate-bounce">
@@ -14,9 +12,18 @@ const NoChatSelected = () => {
           </div>
         </div>
 
-        {/* Welcome Text */}
         <h2 className="text-2xl font-bold">Welcome to UMe!</h2>
-        <p className="text-base-content/60">Select your favorite to start chatting</p>
+        <p className="text-base-content/60">
+          Select a contact to start chatting or add new contacts
+        </p>
+
+        <button
+          onClick={onOpenSearch}
+          className="btn btn-primary gap-2 mx-auto"
+        >
+          <MessageCirclePlus className="w-5 h-5" />
+          Add New Contact
+        </button>
       </div>
     </div>
   );

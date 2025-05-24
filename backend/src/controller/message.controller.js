@@ -6,12 +6,26 @@ import { getRecieverSocketID, io } from "../lib/socket.js";
 export const getUserContacts = async (req,res) =>{
     try {
         const loggedInUser = req.user._id;
-        const filtereduser = await User.find({_id: {$ne: loggedInUser}}).select("-password")
+        /*Changes*/
+        const filtereduser = await User.find({_id: loggedInUser}).select("contacts")
         res.status(200).json(filtereduser)
     } catch (error) {
         console.log("Error in UserContacts" + error.message);
         res.status(500).json({message: "Internal Server Error"});        
     }
+}
+
+
+export const getAllUsers = async (req,res) => {
+    try {
+      const loggedInUser = req.user._id;
+      /*Changes*/
+      const filtereduser = await User.find({_id: {$ne : loggedInUser}}).select("-password")
+      res.status(200).json(filtereduser)
+  } catch (error) {
+      console.log("Error in AllUsers" + error.message);
+      res.status(500).json({message: "Internal Server Error"});        
+  }
 }
 
 export const getMessages = async (req, res) => {

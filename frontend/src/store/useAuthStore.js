@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import axios from "axios";
 import {io} from "socket.io-client"
+import { useChatStore } from "./useChatStore";
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
 export const useAuthStore = create((set, get)=>({
@@ -14,6 +15,8 @@ export const useAuthStore = create((set, get)=>({
     onlineUsers : [], 
     socket: null,
     searchUser : null,
+    friend : [],
+
     checkAuth: async() => {
         try {
             const res = await axiosInstance.get("/auth/check");
@@ -28,6 +31,7 @@ export const useAuthStore = create((set, get)=>({
             set({isCheckingAuth: false});
         }
     },
+
     signup: async(data) => {
         set({isSigningUp : true});
         try {
@@ -65,6 +69,17 @@ export const useAuthStore = create((set, get)=>({
             set({isLoggingIn:false})
         }
     },
+
+    bio : async(data) => {
+        try {
+            const res = await axiosInstance.put("/auth/update-bio", data);
+            set({authUser: res.data});
+            toast.success("Bio Updated Successfully");
+        } catch (error) {
+            toast.error(error.response.data.message);
+        }
+    },
+
     updateProfile: async (data) =>{
         set({isUpdatingProfile: true});
         try {
@@ -104,5 +119,36 @@ export const useAuthStore = create((set, get)=>({
         } catch (error) {
             toast.error(error.response.data.message);
         }
-    }    
+    },
+        
+    addFriend: async (data) => {
+        const { authUser } = get();
+        try {
+            const res = await axiosInstance.post(`/auth/friend/${authUser}`, data);
+            const updatedContacts = res.data.contacts;
+    
+            // Update users in Chat Store
+            const currentUsers = useChatStore.getState().users;
+            const updatedUsers = currentUsers.map(user => 
+                user._id === authUser ? { ...user, contacts: updatedContacts } : user
+            );
+            useChatStore.getState().setUsers(updatedUsers);
+    
+            toast.success("Friend added successfully");
+        } catch (error) {
+            toast.error(error.response.data.message);
+        }
+    },
+
+
+    FriendRequest : async(data) =>{
+        const {authUser} = get();
+        try {
+            const res = await axiosInstance.post("/auth/friendrequest", data);
+            
+        } catch (error) {
+            
+        }
+    },
+      
 }))

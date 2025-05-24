@@ -1,61 +1,26 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
-  {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
+const MessageSchema = new mongoose.Schema({
+    senderId : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required : true
     },
-
-    fullName: {
-      type: String,
-      required: true,
+    recieverId : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required : true
     },
-
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
+    text : {
+        type: String,
     },
+    image : {
+        type: String
+    }
+},
+{
+    timestamps: true
+})
 
-    profilePic: {
-      type: String,
-      default: "",
-    },
-
-    bio : {
-      type: String,
-      default: "Hey, I'm New To UMe!",
-    },
-
-    /*Changes*/
-    contacts: {
-      type: [
-        {
-          fullName: { type: String, required: true },
-          email: { type: String, default: "" },
-          profilePic: { type: String, default: "" },
-        },
-      ],
-      default: [],
-    },
-    
-    requests: {
-      type: [
-        {
-          fullName: { type: String, required: true },
-          email: { type: String, default: "" },
-        },
-      ],
-      default: [],
-    },
-  },
-
-  {
-    timestamps: true,
-  }
-);
-
-const User = mongoose.model("User", userSchema);
-export default User;
+const Message = mongoose.model("Message", MessageSchema);
+export default Message;

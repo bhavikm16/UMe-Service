@@ -3,6 +3,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { LogOut, MessageSquare, Settings, User, EarthLock } from "lucide-react";
 import { Link } from "react-router-dom";
 import Connections from "./Connections";
+import { useEffect } from "react";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
@@ -11,7 +12,6 @@ const Navbar = () => {
   const handleRequests = () => {
     setshowPage((prev) => !prev); // Toggles Connections visibility
   };
-
   return (
     <header
       className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 

@@ -11,7 +11,7 @@ const SearchPage = ({ onClose }) => {
     isUserLoading,
     getAllUsers,
   } = useChatStore();
-  const { search, addFriend } = useAuthStore();
+  const { search, FriendRequest } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -32,9 +32,9 @@ const SearchPage = ({ onClose }) => {
     setSearchQuery("");
   };
 
-  const addContacts = async (userEmail) => {
+  const SendRequest = async (userEmail) => {
     try {
-      await addFriend({ email: userEmail });
+      await FriendRequest({ email: userEmail });
       getUsers();
       setSearchQuery("");
     } catch (error) {
@@ -129,7 +129,7 @@ const SearchPage = ({ onClose }) => {
                       </span>
                     ) : (
                       <button
-                        onClick={() => addContacts(user.email)}
+                        onClick={() => SendRequest(user.email)}
                         className="btn btn-primary btn-sm"
                       >
                         Add

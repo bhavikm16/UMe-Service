@@ -70,10 +70,10 @@ export const addBio = async (req, res) => {
     const { bio } = req.body;
     const myId = req.user._id;
     const user = await User.findByIdAndUpdate(
-        myId,
-        {bio: bio},
-        {new: true}
-    )
+      myId,
+      { bio: bio },
+      { new: true }
+    );
     res.status(200).json(user);
   } catch (error) {
     console.log("Error in Bio", error.message);
@@ -194,6 +194,36 @@ export const addContact = async (req, res) => {
     res.status(200).json({ message: "Friend added successfully" });
   } catch (error) {
     console.error("Error in addContact controller", error.stack);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const FriendRequest = async (req, res) => {
+  try {
+    const myId = req.user._id;
+    const user = await User.findById(myId).select("-password");
+    const { email } = req.body;
+    const friendUser = await User.findOne({ email });
+    friendUser.requests = friendUser.requests || [];
+    friendUser.requests.push({
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+    });
+    await friendUser.save();
+    res.status(200).json("Request Sent successfully");
+  } catch (error) {
+    console.error("Error in FriendRequest controller", error.stack);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const Allrequests = async (req, res) => {
+  try {
+    const user = await User.find({_id: req.user._id}).select("requests");
+    res.status(200).json(user || []);
+  } catch (error) {
+    console.error("Error in Allrequests:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

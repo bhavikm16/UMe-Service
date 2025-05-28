@@ -5,8 +5,7 @@ import { Users } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 
 const SideBar = () => {
-  const { getUsers, users, selectedUser, isUserLoading, setSelectedUser } =
-    useChatStore();
+  const { getUsers, users, selectedUser, isUserLoading, setSelectedUser } = useChatStore();
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
@@ -21,20 +20,15 @@ const SideBar = () => {
     ? uniqueContacts.filter(contact => onlineUsers.includes(contact._id))
     : uniqueContacts;
 
-  console.log("Filtered Contacts:", filteredContacts);
-  console.log("All Users:", users);
-  console.log("Online Users: ", onlineUsers);
-
   if (isUserLoading) return <SideBarSkeleton />;
 
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
+    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-300">
       <div className="border-b border-base-300 w-full p-5">
         <div className="flex items-center gap-2">
-          <Users className="size-6" />
+          <Users className="size-6 text-primary" />
           <span className="font-medium hidden lg:block">Contacts</span>
         </div>
-
         <div className="mt-3 hidden lg:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
             <input
@@ -45,35 +39,28 @@ const SideBar = () => {
             />
             <span className="text-sm">Show online only</span>
           </label>
-          <span className="text-xs text-zinc-500">
-            ({onlineUsers.length - 1} online)
-          </span>
+          <span className="text-xs text-zinc-500">({onlineUsers.length - 1} online)</span>
         </div>
       </div>
 
-      <div className="overflow-y-auto w-full py-3">
+      <div className="overflow-y-auto w-full py-3 px-1">
         {filteredContacts.length > 0 ? (
           filteredContacts.map((contact) => (
             <button
               key={contact._id}
               onClick={() => setSelectedUser(contact)}
-              className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors ${
-                selectedUser?._id === contact._id
-                  ? "bg-base-300 ring-1 ring-base-300"
-                  : ""
+              className={`group w-full p-3 flex items-center gap-3 rounded-lg transition-all duration-200 hover:bg-base-300 ${
+                selectedUser?._id === contact._id ? "bg-base-300 ring-1 ring-primary" : ""
               }`}
             >
               <div className="relative mx-auto lg:mx-0">
                 <img
                   src={contact.profilePic || "/avatar.png"}
                   alt={contact.fullName}
-                  className="size-12 object-cover rounded-full"
+                  className="size-12 object-cover rounded-full shadow-sm transition-transform group-hover:scale-105"
                 />
                 {onlineUsers.includes(contact._id) && (
-                  <span
-                    className="absolute bottom-0 right-0 size-3 bg-green-500 
-                            rounded-full ring-2 ring-zinc-900"
-                  />
+                  <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-white" />
                 )}
               </div>
 
@@ -86,7 +73,7 @@ const SideBar = () => {
             </button>
           ))
         ) : (
-          <div className="text-center text-zinc-500 py-4">
+          <div className="text-center text-zinc-500 py-4 animate-fade-in">
             {showOnlineOnly ? "No online contacts" : "No contacts found"}
           </div>
         )}

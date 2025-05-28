@@ -17,74 +17,50 @@ const ChatContainer = () => {
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
-  console.log("AuthUSer: ", authUser);
+
   useEffect(() => {
     getMessages(selectedUser._id);
     subscribeToMessages();
     return () => unsubscribeToMessages();
-  }, [
-    selectedUser._id,
-    getMessages,
-    subscribeToMessages,
-    unsubscribeToMessages,
-  ]);
+  }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeToMessages]);
 
   useEffect(() => {
-    if (messageEndRef.current && messages) {
+    if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // Function to group messages by day
   const groupMessagesByDay = (messages) => {
     const grouped = {};
-
-    messages.forEach((message) => {
-      const date = new Date(message.createdAt);
-      const dateKey = date.toISOString().split("T")[0]; // YYYY-MM-DD format
-
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = [];
-      }
-
-      grouped[dateKey].push(message);
+    messages.forEach((msg) => {
+      const dateKey = new Date(msg.createdAt).toISOString().split("T")[0];
+      grouped[dateKey] = grouped[dateKey] || [];
+      grouped[dateKey].push(msg);
     });
-
     return grouped;
   };
 
-  // Function to format date header
   const formatDateHeader = (dateStr) => {
-    const today = new Date();
-    const date = new Date(dateStr);
-    const todayStr = today.toISOString().split("T")[0];
-    const yesterday = new Date(today);
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-    if (dateStr === todayStr) {
-      return "Today";
-    } else if (dateStr === yesterdayStr) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year:
-          date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
-      });
-      // Example: "Mar 4" or "Mar 4, 2023" if different year
-    }
+    if (dateStr === today) return "Today";
+    if (dateStr === yesterdayStr) return "Yesterday";
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: new Date(dateStr).getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
+    });
   };
 
-  if (isMessagesLoading)
-    return (
-      <div className="flex flex-1 flex-col overflow-auto">
-        <ChatHeader />
-        <MessageSkeleton />
-        <MessageInput />
-      </div>
-    );
+  if (isMessagesLoading) return (
+    <div className="flex flex-1 flex-col overflow-auto">
+      <ChatHeader />
+      <MessageSkeleton />
+      <MessageInput />
+    </div>
+  );
 
   const groupedMessages = groupMessagesByDay(messages);
   const sortedDates = Object.keys(groupedMessages).sort();
@@ -92,12 +68,11 @@ const ChatContainer = () => {
   return (
     <div className="flex-1 flex flex-col overflow-auto">
       <ChatHeader />
-
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-2">
         {sortedDates.map((date) => (
           <div key={date} className="space-y-4">
-            <div className="sticky top-0 z-10 flex justify-center my-2">
-              <div className="bg-base-200 px-3 py-1 rounded-full text-sm font-medium">
+            <div className="sticky top-0 z-10 flex justify-center my-2 animate-fade-in">
+              <div className="bg-base-200 px-3 py-1 rounded-full text-sm font-medium shadow-sm">
                 {formatDateHeader(date)}
               </div>
             </div>
@@ -105,13 +80,13 @@ const ChatContainer = () => {
             {groupedMessages[date].map((message) => (
               <div
                 key={message._id}
-                className={`chat ${
-                  message.senderId === authUser._id ? "chat-end" : "chat-start"
-                } px-4`}
                 ref={messageEndRef}
+                className={`chat px-4 transition-all ${
+                  message.senderId === authUser._id ? "chat-end" : "chat-start"
+                }`}
               >
                 <div className="chat-image avatar">
-                  <div className="size-10 rounded-full border">
+                  <div className="size-10 rounded-full border shadow-sm">
                     <img
                       src={
                         message.senderId === authUser._id
@@ -127,7 +102,7 @@ const ChatContainer = () => {
                     {formatMessageTime(message.createdAt)}
                   </time>
                 </div>
-                <div className="chat-bubble flex flex-col">
+                <div className="chat-bubble bg-primary/10 text-base-content shadow-sm hover:shadow-md">
                   {message.image && (
                     <img
                       src={message.image}
@@ -142,7 +117,6 @@ const ChatContainer = () => {
           </div>
         ))}
       </div>
-
       <MessageInput />
     </div>
   );

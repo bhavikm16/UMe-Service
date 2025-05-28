@@ -17,7 +17,7 @@
         try {
             const res = await axiosInstance.get("/message/users");
             set({ users: res.data });
-            toast.success("Users Retrieved Successfully");
+           // toast.success("Users Retrieved Successfully");
         } catch (error) {
             toast.error(error.response.data.message);
         } finally {

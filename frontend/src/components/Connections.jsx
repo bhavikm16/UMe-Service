@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { EarthLock } from "lucide-react";
+import { BookHeart } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 
@@ -34,12 +34,6 @@ const Connections = () => {
 
   return (
     <div className="relative" ref={menuRef}>
-      <button className="btn btn-sm gap-2" onClick={toggleDropdown}>
-        <EarthLock className="size-5" />
-        <span className="hidden sm:inline">Connections</span>
-      </button>
-
-      {isOpen && (
         <div className="absolute right-0 mt-2 w-64 bg-base-100 shadow-lg rounded-lg p-4 border border-base-300 z-50">
           <h3 className="font-semibold text-base-content mb-2">
             Notifications
@@ -77,7 +71,7 @@ const Connections = () => {
             )}
           </ul>
         </div>
-      )}
+
     </div>
   );
 };

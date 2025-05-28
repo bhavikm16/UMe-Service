@@ -133,7 +133,7 @@ export const useAuthStore = create((set, get) => ({
       );
       useChatStore.getState().setUsers(updatedUsers);
 
-      toast.success("Friend added successfully");
+      //toast.success("Friend added successfully");
     } catch (error) {
       toast.error(error.response.data.message);
     }
@@ -157,7 +157,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get("/auth/requests");
       set({ requests: res.data });
-      toast.success("Requests Retrieved Successfully");
+      //toast.success("Requests Retrieved Successfully");
     } catch (error) {
       toast.error(error.response.data.message);
     }

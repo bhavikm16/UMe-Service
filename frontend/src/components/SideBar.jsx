@@ -20,6 +20,9 @@ const SideBar = () => {
     ? uniqueContacts.filter(contact => onlineUsers.includes(contact._id))
     : uniqueContacts;
 
+    console.log("allContacts", allContacts)
+    console.log("unique", uniqueContacts)
+  console.log("FILTERED", filteredContacts)
   if (isUserLoading) return <SideBarSkeleton />;
 
   return (

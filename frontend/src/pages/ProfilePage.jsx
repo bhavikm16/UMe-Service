@@ -4,27 +4,23 @@ import { Camera, Mail, User } from "lucide-react";
 
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
-  const [selectedImg, setSelectedImg] = useState(null);
+  const [previewImg, setPreviewImg] = useState(null);
 
-
-  console.log("AuthUser in profile: ",authUser)
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
+    // Show preview immediately
+    setPreviewImg(URL.createObjectURL(file));
 
-    reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append("profilePic", file);
 
-    reader.onload = async () => {
-      const base64Image = reader.result;
-      setSelectedImg(base64Image);
-      try {
-        await updateProfile({ profilePic: base64Image });
-      } catch (error) {
-        console.error("Error updating profile picture:", error);
-      }
-    };
+    try {
+      await updateProfile(formData);
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+    }
   };
 
   return (
@@ -37,24 +33,20 @@ const ProfilePage = () => {
           </div>
 
           {/* avatar upload section */}
-
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
-                src={selectedImg || authUser.profilePic || "/avatar.png"}
+                src={previewImg || authUser.profilePic || "/avatar.png"}
                 alt="Profile"
-                className="size-32 rounded-full object-cover border-4 "
+                className="size-32 rounded-full object-cover border-4"
               />
               <label
                 htmlFor="avatar-upload"
-                className={`
-                  absolute bottom-0 right-0 
+                className={`absolute bottom-0 right-0 
                   bg-base-content hover:scale-105
                   p-2 rounded-full cursor-pointer 
                   transition-all duration-200
-                  ${
-                    isUpdatingProfile ? "animate-pulse pointer-events-none" : ""
-                  }
+                  ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
                 `}
               >
                 <Camera className="w-5 h-5 text-base-200" />
@@ -115,4 +107,5 @@ const ProfilePage = () => {
     </div>
   );
 };
+
 export default ProfilePage;

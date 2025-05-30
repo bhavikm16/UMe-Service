@@ -28,22 +28,24 @@ const MessageInput = () => {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !imagePreview) return;
+    if (!text.trim() && !fileInputRef.current.files[0]) return;
+
+    const formData = new FormData();
+    formData.append("text", text.trim());
+    if (fileInputRef.current.files[0]) {
+      formData.append("image", fileInputRef.current.files[0]);
+    }
 
     try {
-      await sendMessages({
-        text: text.trim(),
-        image: imagePreview,
-      });
-
-      // Clear form
+      await sendMessages(formData);
       setText("");
       setimagePreview(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
     }
   };
+
   return (
     <div className="p-4 w-full">
       {imagePreview && (

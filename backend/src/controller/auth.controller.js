@@ -2,6 +2,8 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
+import multer from "multer";
+
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
   try {
@@ -91,28 +93,46 @@ export const logout = async (req, res) => {
   }
 };
 
-export const updateProfile = async (req, res) => {
-  try {
-    const { profilePic } = req.body;
-    const userId = req.user._id;
 
-    if (!profilePic) {
-      return res.status(400).json({ message: "Profile pic is required" });
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+export const updateProfile = [
+  upload.single("profilePic"), // Middleware to handle file upload
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Upload buffer to Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "profiles" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { profilePic: result.secure_url },
+        { new: true }
+      );
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error("Error in updateProfile:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
-
-    const uploadResponse = await cloudinary.uploader.upload(profilePic);
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { profilePic: uploadResponse.secure_url },
-      { new: true }
-    );
-
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    console.log("error in update profile:", error);
-    res.status(500).json({ message: "Internal server error" });
   }
-};
+];
+
 
 export const checkauth = async (req, res) => {
   try {
@@ -178,14 +198,14 @@ export const addContact = async (req, res) => {
       _id: friend._id,
       fullName: friend.fullName,
       email: friend.email,
-      profilePic: friend.profilePic || "/avatar.png",
+      profilePic: friend.profilePic,
     });
 
     friendUser.contacts.push({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
-      profilePic: user.profilePic || "/avatar.png",
+      profilePic: user.profilePic,
     });
 
     await user.save();

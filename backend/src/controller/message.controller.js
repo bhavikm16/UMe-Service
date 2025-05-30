@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import Message from "../models/message.model.js"
 import cloudinary from "../lib/cloudinary.js";
 import { getRecieverSocketID, io } from "../lib/socket.js";
+import multer from "multer";
 
 export const getUserContacts = async (req,res) =>{
     try {
@@ -47,35 +48,47 @@ export const getMessages = async (req, res) => {
     }
   };
 
-export const sendMessages = async (req,res) => {
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+export const sendMessages = [
+  upload.single("image"),
+  async (req, res) => {
     try {
-        const {text,image} = req.body;
-        const { id: recieverId} = req.params;
-        const myId = req.user._id
-        const senderId = myId;
+      const { text } = req.body;
+      const { id: recieverId } = req.params;
+      const senderId = req.user._id;
 
-        let imageUrl;
-        if(image){
-            const uploadresponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadresponse.secure_url;
-        }
-        const newMessage = new Message({
-            senderId,
-            recieverId,
-            text,
-            image: imageUrl
-        })
-        await newMessage.save();
-        //socket io logic goes here next
-        const receiverSocketId = getRecieverSocketID(recieverId);
-        if(receiverSocketId){
-          io.to(receiverSocketId).emit("newMessage", newMessage);
-        }
+      let imageUrl;
+      if (req.file) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream({ folder: "messages" }, (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          });
+          stream.end(req.file.buffer);
+        });
+        imageUrl = result.secure_url;
+      }
 
-        res.status(201).json(newMessage);
+      const newMessage = new Message({
+        senderId,
+        recieverId,
+        text,
+        image: imageUrl,
+      });
 
+      await newMessage.save();
+
+      const receiverSocketId = getRecieverSocketID(recieverId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newMessage", newMessage);
+      }
+
+      res.status(201).json(newMessage);
     } catch (error) {
-        console.log("Fail to send the Message" + error.message);
-        res.status(500).json({message: "Internal Server Error"});
+      console.log("Fail to send the Message", error.message);
+      res.status(500).json({ message: "Internal Server Error" });
     }
-}
+  }
+];

@@ -79,19 +79,27 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  updateProfile: async (data) => {
-    set({ isUpdatingProfile: true });
-    try {
-      const res = await axiosInstance.put("/auth/update-profile", data);
-      set({ authUser: res.data });
-      toast.success("Profile picture Uploaded Successfully");
-    } catch (error) {
-      console.log("Error While Uploading");
-      toast.error(error.response.data.message);
-    } finally {
-      set({ isUpdatingProfile: false });
-    }
-  },
+ updateProfile: async (data) => {
+  set({ isUpdatingProfile: true });
+  try {
+    const res = await axiosInstance.put("/auth/update-profile", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true, // if your backend needs cookies
+    });
+
+    set({ authUser: res.data });
+    toast.success("Profile picture uploaded successfully");
+  } catch (error) {
+    console.log("Error while uploading:", error);
+    const message = error?.response?.data?.message || "Upload failed";
+    toast.error(message);
+  } finally {
+    set({ isUpdatingProfile: false });
+  }
+},
+
   connectSocket: () => {
     const { authUser } = get();
     if (!authUser || get().socket?.connected) return;
